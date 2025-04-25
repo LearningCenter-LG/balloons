@@ -9,6 +9,8 @@
             background: linear-gradient(to top, #d0eaff, #ffffff);
             overflow: hidden;
             font-family: sans-serif;
+            margin: 0;
+            padding: 0;
         }
         .balloon {
             position: absolute;
@@ -19,9 +21,30 @@
             font-size: 1rem;
             color: #333;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            white-space: normal;
+            max-width: 250px;
+            word-wrap: break-word;
+            text-align: center;
         }
-        @keyframes floatUp {
-            0% { bottom: -50px; opacity: 0; }
+        
+@keyframes floatUp1 {
+    0% { bottom: -60px; transform: translateX(0); opacity: 0; }
+    50% { transform: translateX(-10px); opacity: 1; }
+    100% { bottom: 100vh; transform: translateX(10px); opacity: 0; }
+}
+@keyframes floatUp2 {
+    0% { bottom: -60px; transform: scale(1); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { bottom: 100vh; transform: scale(0.95); opacity: 0; }
+}
+@keyframes floatUp3 {
+    0% { bottom: -60px; transform: rotate(0deg); opacity: 0; }
+    50% { transform: rotate(2deg); opacity: 1; }
+    100% { bottom: 100vh; transform: rotate(-2deg); opacity: 0; }
+}
+@keyframes floatUp {
+
+            0% { bottom: -60px; opacity: 0; }
             10% { opacity: 1; }
             100% { bottom: 100vh; opacity: 0; }
         }
@@ -29,14 +52,19 @@
 </head>
 <body>
 <script>
-const sheetId = "1FUDbQsDeZBg8Pn7_ngzsk8OgB7fRZiIaIQi4eb-azQs";
-const sheetName = "Form Responses 1";
-const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${sheetName}`;
+const url = "https://opensheet.elk.sh/1FUDbQsDeZBg8Pn7_ngzsk8OgB7fRZiIaIQi4eb-azQs/Form%20Responses%201";
 
-function createBalloon(text) {
+let recentIndexes = [];
+
+function createBalloon(text, offset) {
     const div = document.createElement('div');
-    div.className = 'balloon';
-    div.style.left = Math.random() * 80 + '%';
+    
+div.className = 'balloon';
+const anim = ['floatUp1', 'floatUp2', 'floatUp3'][Math.floor(Math.random() * 3)];
+div.style.animationName = anim;
+
+    const left = offset * 15 + 5 + Math.random() * 5;
+    div.style.left = left + '%';
     div.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 90%)`;
     div.textContent = text;
     document.body.appendChild(div);
@@ -46,23 +74,46 @@ function createBalloon(text) {
 async function fetchMessages() {
     try {
         const res = await fetch(url);
-        const data = await res.text();
-        const rows = data.trim().split("\n").slice(1); // Skip header
-        const latest = rows.slice(-10); // Show recent 10 messages
-        for (const row of latest) {
-            const cols = row.split(",");
-            const message = cols[1] || "";
-            const name = cols[2] || "";
-            if (message) createBalloon(`${message} — ${name}`);
+        const data = await res.json();
+        const total = data.length;
+        const showCount = 5;
+        const indexes = [];
+        while (indexes.length < showCount && indexes.length < total) {
+            const i = Math.floor(Math.random() * total);
+            if (!recentIndexes.includes(i)) {
+                indexes.push(i);
+            }
+        }
+        indexes.forEach((i, idx) => {
+            const message = data[i]["메시지를 남겨주세요"] || "";
+            const name = data[i]["닉네임을 입력해주세요"] || "";
+            if (message) {
+                createBalloon(`${message} — ${name}`, idx);
+                recentIndexes.push(i);
+            }
+        });
+        if (recentIndexes.length > 20) {
+            recentIndexes = recentIndexes.slice(-10);
         }
     } catch (e) {
-        console.error("데이터를 불러오지 못했습니다.", e);
+        console.error("메시지를 불러오지 못했습니다.", e);
     }
 }
 
-setInterval(fetchMessages, 10000);
-fetchMessages();
+
+function randomInterval(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function loopMessagesRandomly() {
+    const delay = randomInterval(5000, 12000); // 5~12초 사이
+    fetchMessages().then(() => {
+        setTimeout(loopMessagesRandomly, delay);
+    });
+}
+
+loopMessagesRandomly();
+
 </script>
 </body>
 </html>
-    
