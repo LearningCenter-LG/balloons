@@ -57,8 +57,12 @@ const sheetID = "1FUDbQsDeZBg8Pn7_ngzsk8OgB7fRZiIaIQi4eb-azQs";
 const sheetName = "Form Responses 1";
 const query = encodeURIComponent("SELECT B, C");
 const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
+const MAX_BALLOONS = 30;
 
 function createBalloon(message, name) {
+    const existing = document.querySelectorAll('.balloon');
+    if (existing.length >= MAX_BALLOONS) return;
+
     const div = document.createElement('div');
     div.className = 'balloon';
     div.setAttribute('role', 'alert');
@@ -92,14 +96,12 @@ async function fetchMessages() {
         const rows = json.table.rows;
         if (!rows || rows.length === 0) return;
 
-        let i = 0;
         function showNext() {
             const r = Math.floor(Math.random() * rows.length);
             const message = rows[r].c[0]?.v || "";
             const name = rows[r].c[1]?.v || "";
             if (message) createBalloon(message, name);
-            i++;
-            setTimeout(showNext, 500); // 0.5초 간격
+            setTimeout(showNext, 1000); // 1초 간격
         }
         showNext();
 
@@ -110,7 +112,7 @@ async function fetchMessages() {
 
 function loopMessages() {
     fetchMessages().then(() => {
-        setTimeout(loopMessages, 5000);
+        setTimeout(loopMessages, 10000); // 10초마다 새 시리즈
     });
 }
 
