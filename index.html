@@ -58,12 +58,13 @@ const sheetName = "Form Responses 1";
 const query = encodeURIComponent("SELECT B, C");
 const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
 
-function createBalloon(message, name, idx, totalCount) {
+function createBalloon(message, name) {
     const div = document.createElement('div');
     div.className = 'balloon';
+    div.setAttribute('role', 'alert');
+    div.setAttribute('aria-label', message + (name ? ` from ${name}` : ""));
 
-    const spacingFactor = 100 / (totalCount + 1);
-    div.style.left = (idx * spacingFactor + Math.random() * (spacingFactor * 0.5)) + '%';
+    div.style.left = Math.random() * 90 + 5 + '%';
     div.style.bottom = Math.floor(Math.random() * 6) * 15 + '%';
     div.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 90%)`;
     const anim = ['floatUp1', 'floatUp2', 'floatUp3'][Math.floor(Math.random() * 3)];
@@ -91,18 +92,16 @@ async function fetchMessages() {
         const rows = json.table.rows;
         if (!rows || rows.length === 0) return;
 
-        const count = Math.floor(Math.random() * 5) + 1; // 1~5개 랜덤 표시
-        const indexes = [];
-        while (indexes.length < count && indexes.length < rows.length) {
-            const i = Math.floor(Math.random() * rows.length);
-            if (!indexes.includes(i)) indexes.push(i);
+        let i = 0;
+        function showNext() {
+            const r = Math.floor(Math.random() * rows.length);
+            const message = rows[r].c[0]?.v || "";
+            const name = rows[r].c[1]?.v || "";
+            if (message) createBalloon(message, name);
+            i++;
+            setTimeout(showNext, 500); // 0.5초 간격
         }
-
-        indexes.forEach((i, idx) => {
-            const message = rows[i].c[0]?.v || "";
-            const name = rows[i].c[1]?.v || "";
-            if (message) createBalloon(message, name, idx, count);
-        });
+        showNext();
 
     } catch (err) {
         console.error("불러오기 실패:", err);
@@ -111,7 +110,7 @@ async function fetchMessages() {
 
 function loopMessages() {
     fetchMessages().then(() => {
-        setTimeout(loopMessages, 3000); // 3초마다 새 메시지
+        setTimeout(loopMessages, 5000);
     });
 }
 
