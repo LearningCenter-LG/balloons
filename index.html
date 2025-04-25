@@ -65,7 +65,7 @@ function randomInterval(min, max) {
 function createBalloon(message, name, offset) {
     const div = document.createElement('div');
     div.className = 'balloon';
-    div.style.left = (offset * 15 + 5 + Math.random() * 5) + '%';
+    div.style.left = Math.random() * 85 + '%'; div.style.bottom = Math.random() * 10 + '%';
     div.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 90%)`;
     const anim = ['floatUp1', 'floatUp2', 'floatUp3'][Math.floor(Math.random() * 3)];
     div.style.animationName = anim;
