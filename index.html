@@ -58,14 +58,11 @@ const sheetName = "Form Responses 1";
 const query = encodeURIComponent("SELECT B, C");
 const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
 
-function randomInterval(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function createBalloon(message, name, offset) {
+function createBalloon(message, name) {
     const div = document.createElement('div');
     div.className = 'balloon';
-    div.style.left = Math.random() * 85 + '%'; div.style.bottom = Math.random() * 10 + '%';
+    div.style.left = Math.random() * 80 + '%';
+    div.style.bottom = Math.floor(Math.random() * 6) * 15 + '%';
     div.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 90%)`;
     const anim = ['floatUp1', 'floatUp2', 'floatUp3'][Math.floor(Math.random() * 3)];
     div.style.animationName = anim;
@@ -90,30 +87,33 @@ async function fetchMessages() {
         if (!match || match.length < 2) throw new Error("Invalid GViz response format");
         const json = JSON.parse(match[1]);
         const rows = json.table.rows;
-        const count = Math.min(rows.length, 5);
+        if (!rows || rows.length === 0) return;
+
+        const count = Math.floor(Math.random() * 5) + 1; // 1~5개 랜덤 표시
         const indexes = [];
-        while (indexes.length < count) {
+        while (indexes.length < count && indexes.length < rows.length) {
             const i = Math.floor(Math.random() * rows.length);
             if (!indexes.includes(i)) indexes.push(i);
         }
-        indexes.forEach((i, idx) => {
+
+        indexes.forEach((i) => {
             const message = rows[i].c[0]?.v || "";
             const name = rows[i].c[1]?.v || "";
-            if (message) createBalloon(message, name, idx);
+            if (message) createBalloon(message, name);
         });
+
     } catch (err) {
         console.error("불러오기 실패:", err);
     }
 }
 
-function loopMessagesRandomly() {
-    const delay = randomInterval(5000, 12000);
+function loopMessages() {
     fetchMessages().then(() => {
-        setTimeout(loopMessagesRandomly, delay);
+        setTimeout(loopMessages, 3000); // 3초마다 새 메시지
     });
 }
 
-loopMessagesRandomly();
+loopMessages();
 </script>
 </body>
 </html>
