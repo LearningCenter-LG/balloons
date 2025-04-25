@@ -6,7 +6,7 @@
     <title>풍선 메시지</title>
     <style>
         body {
-            background: linear-gradient(to top, #cceeff, #f0f9ff);
+            background: linear-gradient(to bottom, #87cefa, #ffffff);
             overflow: hidden;
             font-family: "Segoe UI", sans-serif;
             margin: 0;
@@ -58,10 +58,14 @@ const sheetName = "Form Responses 1";
 const query = encodeURIComponent("SELECT B, C");
 const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
 
-function createBalloon(message, name, offset) {
+function createBalloon(message, name, idx) {
     const div = document.createElement('div');
     div.className = 'balloon';
-    div.style.left = (offset * 18 + Math.random() * 5) + '%';
+    
+const spacingFactor = 100 / count;
+div.style.left = (idx * spacingFactor + Math.random() * (spacingFactor - 15)) + '%';
+div.style.bottom = Math.floor(Math.random() * 6) * 15 + '%';
+
     div.style.bottom = Math.floor(Math.random() * 6) * 15 + '%';
     div.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 90%)`;
     const anim = ['floatUp1', 'floatUp2', 'floatUp3'][Math.floor(Math.random() * 3)];
