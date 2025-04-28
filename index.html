@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>풍선 메시지</title>
+    <title>개선된 풍선 메시지</title>
     <style>
         body {
             background: #ccf2f4;
@@ -86,14 +86,7 @@ const sheetName = "Form Responses 1";
 const query = encodeURIComponent("SELECT B, C");
 const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
 const MAX_BALLOONS = 30;
-
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
+let usedSlots = [];
 
 function createBalloon(message, name) {
     const existing = document.querySelectorAll('.balloon');
@@ -104,11 +97,17 @@ function createBalloon(message, name) {
     div.setAttribute('role', 'alert');
     div.setAttribute('aria-label', message + (name ? ` from ${name}` : ""));
 
-    // 균등 분포 슬롯 방식 (10개 영역 중 하나 선택)
-    const slot = Math.floor(Math.random() * 10); 
-    div.style.left = (10 + slot * 8 + Math.random() * 4) + '%'; 
+    let slot;
+    do {
+        slot = Math.floor(Math.random() * 20);
+    } while (usedSlots.includes(slot));
 
-    div.style.bottom = Math.floor(Math.random() * 6) * 15 + '%';
+    usedSlots.push(slot);
+    if (usedSlots.length > 15) usedSlots.shift();
+
+    div.style.left = (5 + slot * 4 + Math.random() * 3) + '%';
+    div.style.bottom = (Math.floor(Math.random() * 20)) * 5 + '%';
+
     div.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 90%)`;
     const anim = ['floatUp1', 'floatUp2', 'floatUp3'][Math.floor(Math.random() * 3)];
     div.style.animationName = anim;
@@ -135,21 +134,19 @@ async function fetchMessages() {
         const rows = json.table.rows;
         if (!rows || rows.length === 0) return;
 
-        const count = 10; // 항상 10개 가져오기
         const indexes = [];
-        while (indexes.length < count && indexes.length < rows.length) {
+        while (indexes.length < 10 && indexes.length < rows.length) {
             const i = Math.floor(Math.random() * rows.length);
             if (!indexes.includes(i)) indexes.push(i);
         }
 
-        const shuffledIndexes = shuffle(indexes);
-        shuffledIndexes.forEach((i) => {
-            const randomDelay = Math.floor(Math.random() * 4000); // 0~4초 랜덤
+        indexes.forEach((i, index) => {
+            const delay = index * (1000 + Math.random() * 2000);
             setTimeout(() => {
                 const message = rows[i].c[0]?.v || "";
                 const name = rows[i].c[1]?.v || "";
                 if (message) createBalloon(message, name);
-            }, randomDelay);
+            }, delay);
         });
 
     } catch (err) {
