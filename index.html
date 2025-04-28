@@ -104,7 +104,7 @@ function createBalloon(message, name) {
     div.setAttribute('role', 'alert');
     div.setAttribute('aria-label', message + (name ? ` from ${name}` : ""));
 
-    div.style.left = (Math.random() * 90 + 5) + '%';
+    div.style.left = (Math.random() * 70 + 15) + '%'; // 15%~85% 랜덤 위치
     div.style.bottom = Math.floor(Math.random() * 6) * 15 + '%';
     div.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 90%)`;
     const anim = ['floatUp1', 'floatUp2', 'floatUp3'][Math.floor(Math.random() * 3)];
@@ -140,12 +140,13 @@ async function fetchMessages() {
         }
 
         const shuffledIndexes = shuffle(indexes);
-        shuffledIndexes.forEach((i, idx) => {
+        shuffledIndexes.forEach((i) => {
+            const randomDelay = Math.floor(Math.random() * 4000); // 0~4초 랜덤
             setTimeout(() => {
                 const message = rows[i].c[0]?.v || "";
                 const name = rows[i].c[1]?.v || "";
                 if (message) createBalloon(message, name);
-            }, idx * 1000);
+            }, randomDelay);
         });
 
     } catch (err) {
