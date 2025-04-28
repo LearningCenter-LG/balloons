@@ -104,7 +104,10 @@ function createBalloon(message, name) {
     div.setAttribute('role', 'alert');
     div.setAttribute('aria-label', message + (name ? ` from ${name}` : ""));
 
-    div.style.left = (Math.random() * 70 + 15) + '%'; // 15%~85% 랜덤 위치
+    // 균등 분포 슬롯 방식 (10개 영역 중 하나 선택)
+    const slot = Math.floor(Math.random() * 10); 
+    div.style.left = (10 + slot * 8 + Math.random() * 4) + '%'; 
+
     div.style.bottom = Math.floor(Math.random() * 6) * 15 + '%';
     div.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 90%)`;
     const anim = ['floatUp1', 'floatUp2', 'floatUp3'][Math.floor(Math.random() * 3)];
@@ -132,7 +135,7 @@ async function fetchMessages() {
         const rows = json.table.rows;
         if (!rows || rows.length === 0) return;
 
-        const count = Math.floor(Math.random() * 5) + 1;
+        const count = 10; // 항상 10개 가져오기
         const indexes = [];
         while (indexes.length < count && indexes.length < rows.length) {
             const i = Math.floor(Math.random() * rows.length);
